@@ -16,7 +16,7 @@ const ORIGIN_URL = "wss://api.hadax.com/ws"
 const TAG = "received"
 
 var (
-	ping = "req: market.btcusdt.kline.1min"
+	ping = "req: market.lxtbtc.kline.1min"
 	size = 512
 )
 
@@ -32,13 +32,12 @@ func initSend() {
 	if _, err := ws.Write([]byte(requestJson())); err != nil {
 		log.Fatal(err)
 	}
-	var msg = make([]byte, size)
-	var n int
-	if n, err = ws.Read(msg); err != nil {
-		log.Fatal(err)
+
+	for {
+		var msg = make([]byte, size)
+		_,err= ws.Read(msg);
+		convert(msg)
 	}
-	fmt.Printf(TAG+" zip : %s.\n", msg[:n])
-	convert(msg)
 }
 
 func convert(byte []byte) {
@@ -46,11 +45,12 @@ func convert(byte []byte) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	n, b, err := UnDate(v)
+	_, b, err := UnDate(v)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf(TAG+"upzip: %s.\n", b[:n])
+	fmt.Println(TAG, string(b))
+	fmt.Println("||")
 }
 
 func UnDate(reader *gzip.Reader) (n int, b []byte, err error) {
@@ -66,8 +66,8 @@ func Unzip(data []byte) (*gzip.Reader, error) {
 
 func requestJson() string {
 	a := make(map[string](string))
-	a["req"] = "market.btcusdt.kline.10min"
-	a["id"] = "id10"
+	a["sub"] = "market.cdcbtc.trade.detail"
+	a["id"] = "id1"
 	v1, _ := json.Marshal(a)
 	println(string(v1))
 	return string(v1);
