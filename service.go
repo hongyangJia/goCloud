@@ -7,6 +7,7 @@ import (
 	"compress/gzip"
 	"bytes"
 	"encoding/json"
+	"strings"
 )
 
 const ORIGIN = "https://api.hadax.com"
@@ -32,16 +33,19 @@ func initSend() {
 	if _, err := ws.Write([]byte(requestJson())); err != nil {
 		log.Fatal(err)
 	}
-
+	var msg = make([]byte, size)
 	for {
-		var msg = make([]byte, size)
 		_,err= ws.Read(msg);
-		convert(msg)
+		if err!=nil{
+			log.Fatal(err)
+		}
+		convert(msg,ws)
 	}
+
 }
 
-func convert(byte []byte) {
-	v, err := Unzip(byte)
+func convert(byt []byte,ws *websocket.Conn) {
+	v, err := Unzip(byt)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -51,6 +55,15 @@ func convert(byte []byte) {
 	}
 	fmt.Println(TAG, string(b))
 	fmt.Println("||")
+
+	if strings.Contains(string(b),"ping"){
+		s:=strings.Replace(string(b),"ping","pong",-1)
+		fmt.Println(TAG,s)
+		if _, err := ws.Write([]byte(s)); err != nil {
+			log.Fatal(err)
+		}
+	}
+
 }
 
 func UnDate(reader *gzip.Reader) (n int, b []byte, err error) {
@@ -66,7 +79,7 @@ func Unzip(data []byte) (*gzip.Reader, error) {
 
 func requestJson() string {
 	a := make(map[string](string))
-	a["sub"] = "market.cdcbtc.trade.detail"
+	a["sub"] = "market.lxtbtc.trade.detail"
 	a["id"] = "id1"
 	v1, _ := json.Marshal(a)
 	println(string(v1))
@@ -75,6 +88,5 @@ func requestJson() string {
 
 
 type parpam struct {
-	req string
-	id  string
+	ping int64
 }
