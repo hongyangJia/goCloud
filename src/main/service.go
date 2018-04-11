@@ -4,32 +4,33 @@ import (
 	"log"
 	"fmt"
 	"golang.org/x/net/websocket"
-	"encoding/json"
-	"strings"
 	"goCloud/src/zips"
 	"goCloud/src/websocket/api"
+	"goCloud/src/websocket/name"
+	"goCloud/src/websocket/time"
+	"goCloud/src/websocket/sub"
+	"goCloud/src/common"
 )
 
-const TAG = "received"
-
-var (
-	ping = "req: market.lxtbtc.kline.1min"
-	size = 512
+const (
+	TAG = "received"
+	SIZE  = 512
 )
-
 func main() {
-	initSend()
+	Start()
 }
 
-func initSend() {
-	ws, err := websocket.Dial(api.ORIGIN_URL, "", api.ORIGIN)
+func Start() {
+
+	ws, err := websocket.Dial(api.HADAX_ORIGIN_URL, api.PROTOCOL, api.HADAX_ORIGIN)
+	defer ws.Close()
 	if err != nil {
 		log.Fatal(err)
 	}
 	if _, err := ws.Write([]byte(requestJson())); err != nil {
 		log.Fatal(err)
 	}
-	var msg = make([]byte, size)
+	var msg = make([]byte, SIZE)
 	for {
 		_, err = ws.Read(msg);
 		if err != nil {
@@ -37,7 +38,6 @@ func initSend() {
 		}
 		convert(msg, ws)
 	}
-
 }
 
 func convert(byt []byte, ws *websocket.Conn) {
@@ -45,29 +45,21 @@ func convert(byt []byte, ws *websocket.Conn) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, b, err := zips. UnDate(v)
+	_, b, err := zips.UnDate(v)
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Println(TAG, string(b))
-	fmt.Println("||")
-
-	if strings.Contains(string(b), "ping") {
-		s := strings.Replace(string(b), "ping", "pong", -1)
-		fmt.Println(TAG, s)
-		if _, err := ws.Write([]byte(s)); err != nil {
-			log.Fatal(err)
-		}
+	pong,err:=common.ReplacePong(string(b))
+	if err!=nil {
+		return
 	}
-
+	if _, err := ws.Write([]byte(pong)); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func requestJson() string {
-	a := make(map[string](string))
-	a["sub"] = "market.lxtbtc.trade.detail"
-	a["id"] = "id1"
-	v1, _ := json.Marshal(a)
-	println(string(v1))
-	return string(v1);
+	return sub.KLine(name.AAC,time.MIN1);
 }
 
