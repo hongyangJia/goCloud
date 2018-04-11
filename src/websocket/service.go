@@ -1,33 +1,25 @@
-package main
+package websocket
 
 import (
 	"log"
-	"fmt"
 	"golang.org/x/net/websocket"
 	"goCloud/src/zips"
 	"goCloud/src/websocket/api"
-	"goCloud/src/websocket/name"
-	"goCloud/src/websocket/time"
-	"goCloud/src/websocket/sub"
 	"goCloud/src/common"
+	"net/http"
 )
-
 const (
 	TAG = "received"
 	SIZE  = 512
 )
-func main() {
-	Start()
-}
 
-func Start() {
-
-	ws, err := websocket.Dial(api.HADAX_ORIGIN_URL, api.PROTOCOL, api.HADAX_ORIGIN)
+func Start(conifg *Conifg) {
+	ws, err := websocket.Dial(conifg.Url, api.PROTOCOL, conifg.Origin)
 	defer ws.Close()
 	if err != nil {
 		log.Fatal(err)
 	}
-	if _, err := ws.Write([]byte(requestJson())); err != nil {
+	if _, err := ws.Write([]byte(conifg.Topics)); err != nil {
 		log.Fatal(err)
 	}
 	var msg = make([]byte, SIZE)
@@ -36,11 +28,11 @@ func Start() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		convert(msg, ws)
+		convert(msg, ws,conifg)
 	}
 }
 
-func convert(byt []byte, ws *websocket.Conn) {
+func convert(byt []byte, ws *websocket.Conn,conifg *Conifg) {
 	v, err := zips.Unzip(byt)
 	if err != nil {
 		log.Fatal(err)
@@ -49,7 +41,7 @@ func convert(byt []byte, ws *websocket.Conn) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(TAG, string(b))
+	conifg.Call(string(b),conifg.W)
 	pong,err:=common.ReplacePong(string(b))
 	if err!=nil {
 		return
@@ -59,7 +51,11 @@ func convert(byt []byte, ws *websocket.Conn) {
 	}
 }
 
-func requestJson() string {
-	return sub.KLine(name.AAC,time.MIN1);
+type Conifg struct {
+	 Url string
+	 Origin string
+	 Topics  string
+	 W   http.ResponseWriter
+	 Call func(string2 string,w  http.ResponseWriter)
 }
 
