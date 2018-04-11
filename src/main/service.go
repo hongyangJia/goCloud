@@ -4,15 +4,11 @@ import (
 	"log"
 	"fmt"
 	"golang.org/x/net/websocket"
-	"compress/gzip"
-	"bytes"
 	"encoding/json"
 	"strings"
+	"goCloud/src/zips"
+	"goCloud/src/websocket/api"
 )
-
-const ORIGIN = "https://api.hadax.com"
-
-const ORIGIN_URL = "wss://api.hadax.com/ws"
 
 const TAG = "received"
 
@@ -26,7 +22,7 @@ func main() {
 }
 
 func initSend() {
-	ws, err := websocket.Dial(ORIGIN_URL, "", ORIGIN)
+	ws, err := websocket.Dial(api.ORIGIN_URL, "", api.ORIGIN)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -35,46 +31,35 @@ func initSend() {
 	}
 	var msg = make([]byte, size)
 	for {
-		_,err= ws.Read(msg);
-		if err!=nil{
+		_, err = ws.Read(msg);
+		if err != nil {
 			log.Fatal(err)
 		}
-		convert(msg,ws)
+		convert(msg, ws)
 	}
 
 }
 
-func convert(byt []byte,ws *websocket.Conn) {
-	v, err := Unzip(byt)
+func convert(byt []byte, ws *websocket.Conn) {
+	v, err := zips.Unzip(byt)
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, b, err := UnDate(v)
+	_, b, err := zips. UnDate(v)
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Println(TAG, string(b))
 	fmt.Println("||")
 
-	if strings.Contains(string(b),"ping"){
-		s:=strings.Replace(string(b),"ping","pong",-1)
-		fmt.Println(TAG,s)
+	if strings.Contains(string(b), "ping") {
+		s := strings.Replace(string(b), "ping", "pong", -1)
+		fmt.Println(TAG, s)
 		if _, err := ws.Write([]byte(s)); err != nil {
 			log.Fatal(err)
 		}
 	}
 
-}
-
-func UnDate(reader *gzip.Reader) (n int, b []byte, err error) {
-	var msg = make([]byte, 512)
-	number, err := reader.Read(msg)
-	return number, msg, err;
-}
-
-func Unzip(data []byte) (*gzip.Reader, error) {
-	b := bytes.NewReader(data)
-	return gzip.NewReader(b)
 }
 
 func requestJson() string {
@@ -86,7 +71,3 @@ func requestJson() string {
 	return string(v1);
 }
 
-
-type parpam struct {
-	ping int64
-}
