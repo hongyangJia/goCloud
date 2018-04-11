@@ -30,5 +30,5 @@ func start(w http.ResponseWriter) {
 }
 
 func receive(s string, w http.ResponseWriter) {
-	fmt.Print(s)
+	fmt.Println(s)
 }
