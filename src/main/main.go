@@ -27,6 +27,7 @@ func start(w http.ResponseWriter) {
 	topic := sub.MarketDetail(name.AAC)
 	con := websocket.Conifg{api.HADAX_ORIGIN_URL, api.HADAX_ORIGIN, topic, w, receive}
 	websocket.Start(&con)
+
 }
 
 func receive(s string, w http.ResponseWriter) {
