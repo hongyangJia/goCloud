@@ -4,7 +4,7 @@ const MARKET = "market."
 const KLINE = ".kline."
 const DEPTH = ".depth."
 const DETAIL = ".detail"
-const TRADE = ".trade" + DEPTH
+const TRADE = ".trade" + DETAIL
 
 /**
  *market.$symbol.kline.$period

@@ -6,7 +6,7 @@ import (
 	"goCloud/src/zips"
 	"goCloud/src/websocket/api"
 	"goCloud/src/common"
-	"net/http"
+	"goCloud/src/websocket/sub"
 )
 const (
 	TAG = "received"
@@ -19,7 +19,7 @@ func Start(conifg *Conifg) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if _, err := ws.Write([]byte(conifg.Topics)); err != nil {
+	if _, err := ws.Write([]byte(conifg.Topics.Parameter)); err != nil {
 		log.Fatal(err)
 	}
 	var msg = make([]byte, SIZE)
@@ -39,9 +39,8 @@ func convert(byt []byte, ws *websocket.Conn,conifg *Conifg) {
 	}
 	_, b, err := zips.UnDate(v)
 	if err != nil {
-		log.Fatal(err)
 	}
-	conifg.Call(string(b),conifg.W)
+	conifg.Call(string(b),conifg.Topics.State)
 	pong,err:=common.ReplacePong(string(b))
 	if err!=nil {
 		return
@@ -54,8 +53,7 @@ func convert(byt []byte, ws *websocket.Conn,conifg *Conifg) {
 type Conifg struct {
 	 Url string
 	 Origin string
-	 Topics  string
-	 W   http.ResponseWriter
-	 Call func(string2 string,w  http.ResponseWriter)
+	 Topics  *sub.Detail
+	 Call func(v string,state string)
 }
 

@@ -1,11 +1,11 @@
 package name
 
-
 /**
  *type:hahax
  *tag:digiccy name
  */
 const (
+	AE   = "aebtc"
 	LXT  = "lxtbtc"
 	CDC  = "cdcbtc"
 	UUU  = "uuubtc"
