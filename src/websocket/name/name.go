@@ -6,6 +6,10 @@ package name
  */
 const (
 	AE   = "aebtc"
+	GET   = "getbtc"
+	OMG   = "omgusdt"
+	ETH   = "ethusdt"
+	BTC   = "btcusdt"
 	LXT  = "lxtbtc"
 	CDC  = "cdcbtc"
 	UUU  = "uuubtc"

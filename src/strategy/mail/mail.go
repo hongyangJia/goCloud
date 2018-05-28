@@ -1,9 +1,5 @@
 package mail
 
-import (
-	"gopkg.in/gomail.v2"
-)
-
 const (
 	SMTP = "smtp.qq.com"
 	PORT = 465

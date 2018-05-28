@@ -3,14 +3,14 @@ package websocket
 import (
 	"log"
 	"golang.org/x/net/websocket"
-	"goCloud/src/zips"
+	"goCloud/src/common/zips"
 	"goCloud/src/websocket/api"
 	"goCloud/src/common"
-	"goCloud/src/websocket/sub"
 )
+
 const (
-	TAG = "received"
-	SIZE  = 512
+	TAG  = "received"
+	SIZE = 512
 )
 
 func Start(conifg *Conifg) {
@@ -19,8 +19,10 @@ func Start(conifg *Conifg) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if _, err := ws.Write([]byte(conifg.Topics.Parameter)); err != nil {
-		log.Fatal(err)
+	for i,_ := range conifg.Topics {
+		if _, err := ws.Write([]byte(i)); err != nil {
+			log.Fatal(err)
+		}
 	}
 	var msg = make([]byte, SIZE)
 	for {
@@ -28,21 +30,19 @@ func Start(conifg *Conifg) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		convert(msg, ws,conifg)
+		convert(msg, ws, conifg)
 	}
 }
 
-func convert(byt []byte, ws *websocket.Conn,conifg *Conifg) {
+func convert(byt []byte, ws *websocket.Conn, conifg *Conifg) {
 	v, err := zips.Unzip(byt)
 	if err != nil {
 		log.Fatal(err)
 	}
 	_, b, err := zips.UnDate(v)
+	conifg.Call(string(b))
+	pong, err := common.ReplacePong(string(b))
 	if err != nil {
-	}
-	conifg.Call(string(b),conifg.Topics.State)
-	pong,err:=common.ReplacePong(string(b))
-	if err!=nil {
 		return
 	}
 	if _, err := ws.Write([]byte(pong)); err != nil {
@@ -51,9 +51,8 @@ func convert(byt []byte, ws *websocket.Conn,conifg *Conifg) {
 }
 
 type Conifg struct {
-	 Url string
-	 Origin string
-	 Topics  *sub.Detail
-	 Call func(v string,state string)
+	Url    string
+	Origin string
+	Topics map[string]string
+	Call   func(v string)(c string,err error)
 }
-
