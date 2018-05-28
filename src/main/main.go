@@ -9,7 +9,6 @@ import (
 	"goCloud/src/websocket/topic"
 	"goCloud/src/websocket/time"
 	"goCloud/src/websocket/name"
-	"fmt"
 )
 
 func main() {
@@ -43,7 +42,7 @@ func start() {
 }
 
 func receive(v string) (c string, e error) {
-	 fmt.Println(v)
+	 //fmt.Println(v)
 	if conversion.Ping(v) != nil {
 		return
 	}

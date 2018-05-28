@@ -19,7 +19,7 @@ func Start(conifg *Conifg) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	for i,_ := range conifg.Topics {
+	for i, _ := range conifg.Topics {
 		if _, err := ws.Write([]byte(i)); err != nil {
 			log.Fatal(err)
 		}
@@ -40,7 +40,13 @@ func convert(byt []byte, ws *websocket.Conn, conifg *Conifg) {
 		log.Fatal(err)
 	}
 	_, b, err := zips.UnDate(v)
-	conifg.Call(string(b))
+
+	c, err := conifg.Call(string(b))
+	if err != nil {
+		if _, err := ws.Write([]byte(c)); err != nil {
+			log.Fatal(err)
+		}
+	}
 	pong, err := common.ReplacePong(string(b))
 	if err != nil {
 		return
@@ -54,5 +60,5 @@ type Conifg struct {
 	Url    string
 	Origin string
 	Topics map[string]string
-	Call   func(v string)(c string,err error)
+	Call   func(v string) (c string, err error)
 }
